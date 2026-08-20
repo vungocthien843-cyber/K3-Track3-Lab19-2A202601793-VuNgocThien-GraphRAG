@@ -1,8 +1,10 @@
 # Báo Cáo Thực Hành & Thuyết Minh Kỹ Thuật — Lab 19: GraphRAG vs Flat RAG
 
-**Học viên:** Vũ Ngọc Thiên  
-**Khóa học:** AICB-K34 · Track 3: GraphRAG  
+**Học viên:** Vũ Ngọc Thiện - 2A202601793
 **Ngày thực hiện:** 19/08/2026  
+
+> **Cập nhật kết quả thực nghiệm:** Báo cáo này đã được đối chiếu với
+> `outputs/graphrag_eval_results.csv`. 
 
 ---
 
@@ -52,11 +54,25 @@
 
 | Tiêu chí đánh giá | Flat RAG | GraphRAG | Độ chênh lệch ($\Delta$) | Nhận xét phân tích |
 |-------------------|----------|----------|--------------------------|-------------------|
-| **Comprehensiveness (1–5)** | 3.2 | 4.6 | +1.4 | GraphRAG cung cấp câu trả lời toàn diện hơn nhờ tổng hợp thông tin từ nhiều nguồn qua các cạnh đồ thị. |
-| **Faithfulness (1–5)** | 4.1 | 4.8 | +0.7 | GraphRAG bám sát thông tin (facts) thực tế hơn nhờ schema chặt chẽ, ít bị ảo giác (hallucination). |
-| **Multi-hop Reasoning (1–5)** | 2.5 | 4.9 | +2.4 | Vượt trội hoàn toàn ở GraphRAG khi câu hỏi yêu cầu suy luận gián tiếp qua nhiều bước. |
-| **Latency trung bình (s)** | 1.2s | 3.5s | +2.3s | GraphRAG chậm hơn đáng kể do phải truy xuất database Neo4j (Cypher) và duyệt BFS. |
-| **Token usage trung bình** | ~2000 | ~4200 | +2200 | Lượng ngữ cảnh (Graph + Text) đưa vào LLM cho GraphRAG lớn hơn nhiều so với Flat RAG. |
+| **Comprehensiveness (1–5)** | 1.17 | 1.42 | +0.25 | GraphRAG cao hơn nhẹ trong mẫu 12 câu, nhưng điểm tuyệt đối thấp. |
+| **Faithfulness (1–5)** | 1.33 | 1.67 | +0.33 | GraphRAG cao hơn nhẹ; cần chạy đủ mẫu để kết luận ổn định. |
+| **Multi-hop Reasoning (1–5)** | 1.08 | 1.83 | +0.75 | Đây là mức cải thiện rõ nhất của GraphRAG trong mẫu hiện có. |
+| **Latency trung bình (s)** | 5.06s | 5.29s | +0.23s | GraphRAG chậm hơn nhẹ trên 12 câu. |
+| **Token usage trung bình** | 909.75 | 758.25 | −151.50 | GraphRAG dùng ít token hơn trong checkpoint hiện tại; cần kiểm tra thêm khi đủ 50 câu. |
+
+#### Phân tích theo nhóm trên checkpoint hiện tại
+
+| Nhóm | Số câu | Flat comp. | Graph comp. | Flat faith. | Graph faith. | Flat multi-hop | Graph multi-hop |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cross-doc | 5 | 1.40 | 2.00 | 1.80 | 1.80 | 1.20 | 2.20 |
+| factoid | 1 | 1.00 | 1.00 | 1.00 | 5.00 | 1.00 | 5.00 |
+| multi-hop | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+
+**Kết luận có điều kiện:** Trong 12 câu đã chạy, GraphRAG tốt hơn Flat RAG ở cả
+ba điểm trung bình và đặc biệt ở multi-hop reasoning (+0.75). Tuy nhiên, 6 câu
+multi-hop hiện chưa cho thấy cải thiện, còn điểm tổng thể thấp; vì vậy chưa nên
+khẳng định GraphRAG vượt trội cho toàn bộ bài. Cần chạy tiếp 38 câu còn lại và
+giữ nguyên checkpoint để có kết luận cuối cùng.
 
 #### Phân tích 2 Ca lỗi Điển hình:
 1. **Ca lỗi Flat RAG thất bại (GraphRAG thành công):**
